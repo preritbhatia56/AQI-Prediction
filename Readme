@@ -1,242 +1,113 @@
 # 🌍 Surface AQI Prediction Using Satellite Data
 
-<p align="center">
-  <b>ISRO Hackathon Project</b><br>
-  Satellite Remote Sensing • Machine Learning • Air Quality Analysis
-</p>
+> **A machine-learning framework for predicting Surface Air Quality Index (AQI) by integrating satellite, ground-based, and meteorological data.**
 
 ---
 
 ## 📌 Overview
 
-Air pollution monitoring through conventional ground-based stations is limited by the number and geographical distribution of monitoring stations. Satellite observations provide much broader spatial coverage and can help bridge this gap.
+Air pollution monitoring through conventional ground-based stations is limited by the number and geographical distribution of monitoring sites. Satellite observations provide much broader spatial coverage and can effectively bridge this gap.
 
-This project focuses on the **development of a machine-learning-based approach for Surface Air Quality Index (AQI) prediction using satellite, ground-based, and meteorological data**.
-
-Developed as part of the **ISRO Hackathon**, the project combines ground monitoring observations from CPCB with satellite-derived atmospheric information, Aerosol Optical Depth (AOD), and meteorological variables to build a data-driven framework for surface-level air-quality analysis.
-
-The primary goal is to explore how satellite observations can complement conventional ground-based monitoring and contribute to more spatially comprehensive air-quality prediction.
-
----
+This project combines ground monitoring observations from the CPCB with satellite-derived atmospheric information, Aerosol Optical Depth (AOD), and meteorological variables. The primary goal is to explore how satellite observations can complement conventional ground-based monitoring to build a scalable, data-driven framework for spatially comprehensive air-quality prediction.
 
 ## 🎯 Objectives
 
-* Develop a machine-learning-based approach for **surface AQI prediction**
-* Integrate satellite observations with ground-based air-quality measurements
-* Analyze the relationship between satellite atmospheric observations and surface-level air quality
-* Incorporate meteorological conditions that influence pollutant concentration and transport
-* Build a scalable workflow that can potentially support air-quality monitoring beyond locations covered by ground stations
+* **Develop** a machine-learning-based approach for surface AQI prediction.
+* **Integrate** satellite observations with ground-based air-quality measurements.
+* **Analyze** the relationship between satellite atmospheric observations and surface-level air quality.
+* **Incorporate** meteorological conditions that influence pollutant concentration, dispersion, and transport.
+* **Build** a scalable workflow to support air-quality monitoring beyond locations covered by physical ground stations.
 
 ---
 
 ## 🛰️ Data Sources
 
-The project integrates multiple datasets to capture different aspects of atmospheric pollution.
+The project integrates multiple heterogeneous datasets to capture different aspects of atmospheric pollution:
 
-### 1. CPCB Ground Monitoring Data
-
-Ground-level air-quality observations from **Central Pollution Control Board (CPCB)** monitoring stations were used as the reference data for surface air-quality analysis.
-
-**Delhi study:**
-
-* **44 CPCB monitoring stations** initially collected
-* Data covered **1 January 2025 – 31 December 2025**
-* **43 stations** in the final working dataset after preprocessing
-* Ground measurements were used as the basis for surface-level air-quality analysis
-
-### 2. Sentinel-5P / TROPOMI
-
-Satellite observations from **Sentinel-5P / TROPOMI** were incorporated to provide atmospheric pollutant information.
-
-The satellite data provides wide spatial coverage compared with conventional monitoring stations and can be used as additional predictive features for the AQI model.
-
-### 3. MODIS MAIAC AOD
-
-**MODIS MAIAC Aerosol Optical Depth (AOD)** was incorporated as an important feature representing atmospheric aerosol loading.
-
-AOD provides information about aerosol presence in the atmospheric column and can help establish a relationship between satellite observations and surface-level particulate pollution.
-
-### 4. ERA5 Meteorological Data
-
-Meteorological variables were incorporated because atmospheric conditions strongly affect pollutant concentration, dispersion, and transport.
-
-Relevant variables include:
-
-* Temperature
-* Humidity
-* Wind conditions
-* Atmospheric pressure
+| Data Source | Description | Purpose in Project |
+| :--- | :--- | :--- |
+| **CPCB Ground Data** | Ground-level air-quality observations from 43 working stations in Delhi. | Serves as the ground-truth reference data for surface air-quality analysis. |
+| **Sentinel-5P / TROPOMI** | Satellite observations providing atmospheric pollutant information. | Provides wide spatial coverage; used as predictive features alongside ground data. |
+| **MODIS MAIAC AOD** | Aerosol Optical Depth (AOD) data. | Represents atmospheric aerosol loading to establish relationships with surface particulate pollution. |
+| **ERA5 Meteorology** | Meteorological variables (Temperature, Humidity, Wind conditions, Atmospheric pressure). | Accounts for atmospheric conditions that affect pollutant concentration, dispersion, and transport. |
 
 ---
 
-## 🧠 Methodology
+## 🧠 Methodology & Pipeline
 
-```text
-                         DATA SOURCES
-                              │
-          ┌───────────────────┼───────────────────┐
-          │                   │                   │
-     CPCB Ground         Sentinel-5P          MAIAC AOD
-       Data              Satellite Data
-          │                   │                   │
-          └───────────────────┼───────────────────┘
-                              │
-                              ▼
-                   Google Earth Engine
-                              │
-                              ▼
-                       Data Extraction
-                              │
-                              ▼
-                  ERA5 Meteorological Data
-                              │
-                              ▼
-                    Data Preprocessing
-                              │
-                              ▼
-                     Dataset Integration
-                              │
-                              ▼
-                    Feature Engineering
-                              │
-                              ▼
-                     Machine Learning
-                    ┌─────────┼─────────┐
-                    │         │         │
-              Random Forest XGBoost LightGBM
-                    │         │         │
-                    └─────────┼─────────┘
-                              │
-                              ▼
-                       AQI Prediction
+The major contribution of this project is the integration of these heterogeneous environmental datasets into a unified machine-learning workflow.
+
+### Architecture
+
+```mermaid
+flowchart TD
+    subgraph Data Sources
+    A1[CPCB Ground Data] 
+    A2[Sentinel-5P Satellite Data] 
+    A3[MODIS MAIAC AOD]
+    A4[ERA5 Meteorological Data]
+    end
+
+    A1 --> B[Google Earth Engine]
+    A2 --> B
+    A3 --> B
+    
+    B --> C[Data Extraction]
+    C --> D[Data Preprocessing & Cleaning]
+    A4 --> D
+    
+    D --> E[Dataset Integration]
+    E --> F[Feature Engineering]
+    
+    F --> G[Machine Learning Models]
+    G --> H1(Random Forest)
+    G --> H2(XGBoost)
+    G --> H3(LightGBM)
+    
+    H1 --> I[Surface AQI Prediction]
+    H2 --> I
+    H3 --> I
+
 ```
 
----
+### 🔄 Data Processing Steps
 
-## 🔄 Data Processing Pipeline
-
-### Step 1 — Ground Data Collection
-
-Daily observations from CPCB monitoring stations were collected and consolidated into a single dataset.
-
-Station metadata including:
-
-* Station name
-* Latitude
-* Longitude
-* Date
-
-were standardized so that satellite and meteorological observations could be associated with individual monitoring locations.
-
-### Step 2 — Satellite Data Extraction
-
-**Google Earth Engine (GEE)** was used to efficiently extract satellite observations instead of manually downloading large numbers of satellite files.
-
-Satellite observations were associated with corresponding monitoring-station locations and dates, allowing satellite and ground observations to be aligned spatially and temporally.
-
-### Step 3 — Data Cleaning
-
-The preprocessing pipeline included:
-
-* Standardizing station names
-* Correcting station coordinates
-* Handling missing values
-* Aligning dates
-* Removing inconsistent records
-* Combining datasets using spatial and temporal relationships
-
-### Step 4 — Dataset Integration
-
-The integrated dataset combines:
-
-```text
-CPCB Ground Measurements
-            +
-Sentinel-5P Satellite Observations
-            +
-MAIAC AOD
-            +
-ERA5 Meteorology
-            +
-Location & Date
-            ↓
-Integrated Air Quality Dataset
-```
-
-The resulting dataset provides a common feature space for machine-learning-based air-quality analysis.
+1. **Ground Data Collection:** Consolidated daily observations from 43 CPCB monitoring stations. Standardized metadata (Name, Lat, Lon, Date) to associate with satellite data.
+2. **Satellite Data Extraction:** Leveraged **Google Earth Engine (GEE)** to efficiently extract Sentinel-5P and MODIS data without manually downloading large files.
+3. **Data Cleaning:** Standardized station names, corrected coordinates, handled missing values, aligned dates, and removed inconsistent records.
+4. **Dataset Integration:** Combined ground measurements, satellite observations, AOD, meteorology, location, and date into a unified dataset providing a common feature space for ML models.
 
 ---
 
-## 🤖 Machine Learning
+## 🤖 Machine Learning Models
 
-Three tree-based machine-learning models were explored.
+Because Sentinel-5P measurements represent *atmospheric column information* rather than direct surface concentrations, they are used as predictive features alongside AOD and meteorological variables. Three tree-based machine-learning models were explored:
 
-| Model             | Role                                                              |
-| ----------------- | ----------------------------------------------------------------- |
-| **Random Forest** | Robust baseline for nonlinear relationships                       |
-| **XGBoost**       | Captures complex nonlinear relationships and feature interactions |
-| **LightGBM**      | Efficient gradient-boosting model for structured tabular data     |
-
-The models use satellite and meteorological observations as input features while using ground-based observations to learn their relationship with surface air quality.
-
-> **Important:** Sentinel-5P measurements represent atmospheric column information rather than direct surface concentrations. They are therefore used as predictive features alongside AOD, meteorological variables, location, and ground observations rather than being treated directly as surface concentrations.
+| Model | Role / Characteristics |
+| --- | --- |
+| **Random Forest** | Serves as a robust baseline for capturing nonlinear relationships. |
+| **XGBoost** | Captures complex nonlinear relationships and intricate feature interactions. |
+| **LightGBM** | Highly efficient gradient-boosting model optimized for structured tabular data. |
 
 ---
 
-## 📊 Project Dataset
+## 📊 Project Dataset Details
 
-The final integrated dataset contains observations associated with:
+The final integrated dataset enables both temporal and spatial analysis of air quality. It contains observations characterized by:
 
-* **43 monitoring stations**
-* **365 days of 2025 observations**
-* Ground air-quality measurements
-* Satellite observations
-* Aerosol Optical Depth
-* Meteorological variables
-* Station coordinates
-* Date information
-
-This combination enables both **temporal and spatial analysis** of air quality.
-
----
-
-## 🌟 Key Contribution
-
-The major contribution of this project is the **integration of heterogeneous environmental datasets into a unified machine-learning workflow**.
-
-Instead of relying solely on ground monitoring stations, the approach combines:
-
-> **Ground Observations + Satellite Observations + Aerosol Data + Meteorology**
-
-This provides a foundation for developing more spatially comprehensive air-quality monitoring and prediction systems.
+* **Coverage:** 43 monitoring stations in Delhi.
+* **Timeframe:** 365 days of consolidated observations.
+* **Features:** Ground AQ measurements, Satellite observations, Aerosol Optical Depth, Meteorological variables, Station coordinates, and Date information.
 
 ---
 
 ## 🚀 Future Scope
 
-Potential extensions include:
-
-* Generate high-resolution AQI prediction maps
-* Expand the analysis from Delhi to larger regions of India
-* Incorporate additional satellite observations
-* Explore deep-learning models such as CNNs or LSTMs
-* Investigate pollutant transport using wind and meteorological data
-* Develop an interactive air-quality visualization dashboard
-* Deploy the trained model as an online prediction service
-
----
-
-## 🏆 Project Context
-
-**Event:** ISRO Hackathon
-
-**Problem Statement:**
-
-> **Development of Surface AQI & Identification of HCHO Hotspots over India using Satellite Data**
-
-Although the original hackathon problem statement included HCHO hotspot identification, this repository focuses specifically on the **Surface AQI prediction component** developed in the project.
-
-The project explores how **satellite remote sensing and machine learning can complement conventional ground-based air-quality monitoring** and provide a more scalable approach to environmental monitoring.
+* **High-Resolution Maps:** Generate and visualize high-resolution AQI prediction maps.
+* **Geographical Expansion:** Scale the analysis from Delhi to larger regions and other major cities.
+* **Deep Learning:** Explore advanced neural networks such as CNNs (for spatial features) or LSTMs (for temporal sequences).
+* **Pollutant Transport:** Investigate dynamic pollutant transport using wind vectors and meteorological data.
+* **Deployment:** Develop an interactive air-quality visualization dashboard and deploy the trained model as an online prediction service (API).
 
 ---
 
@@ -244,10 +115,7 @@ The project explores how **satellite remote sensing and machine learning can com
 
 **Prerit Bhatia**
 
-Developed as part of a collaborative research-oriented project for the **ISRO Hackathon**.
+*A research-oriented data science project exploring the intersection of satellite remote sensing and machine learning for environmental monitoring.*
 
----
 
-<p align="center">
-  🌍 <b>Satellite Data</b> • 🤖 <b>Machine Learning</b> • 🌫️ <b>Air Quality</b>
-</p>
+```
